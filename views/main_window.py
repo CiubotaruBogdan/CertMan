@@ -3,7 +3,8 @@ Fereastra principală a aplicației
 """
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                               QPushButton, QLineEdit, QLabel, QMessageBox,
-                              QFileDialog, QStatusBar, QToolBar, QComboBox)
+                              QFileDialog, QStatusBar, QToolBar, QComboBox,
+                              QDialog, QCheckBox, QDialogButtonBox, QGridLayout)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from views.table_view import CertificateTableView
@@ -139,6 +140,25 @@ class MainWindow(QMainWindow):
         refresh_action.setStatusTip("Reîmprospătează datele")
         refresh_action.triggered.connect(self._load_data)
         toolbar.addAction(refresh_action)
+        
+        toolbar.addSeparator()
+        
+        # Buton Selectare Coloane
+        columns_action = QAction("☰ Selectare Coloane", self)
+        columns_action.setStatusTip("Selectează coloanele vizibile")
+        columns_action.triggered.connect(self._on_select_columns)
+        toolbar.addAction(columns_action)
+        
+        # Spacer pentru a împinge butonul Despre la dreapta
+        spacer = QWidget()
+        spacer.setSizePolicy(QWidget.SizePolicy.Policy.Expanding, QWidget.SizePolicy.Policy.Preferred)
+        toolbar.addWidget(spacer)
+        
+        # Buton Despre (dreapta jos)
+        about_action = QAction("ⓘ Despre", self)
+        about_action.setStatusTip("Despre aplicație")
+        about_action.triggered.connect(self._on_about)
+        toolbar.addAction(about_action)
     
     def _load_data(self):
         """Încarcă datele în tabel"""
@@ -328,3 +348,121 @@ class MainWindow(QMainWindow):
                 )
             except Exception as e:
                 QMessageBox.critical(self, "Eroare", f"Eroare la schimbarea sursei: {str(e)}")
+    
+    def _on_select_columns(self):
+        """Handler pentru selectarea coloanelor vizibile"""
+        from models.certificate import COLUMN_NAMES
+        
+        # Creează dialog
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Selectare Coloane")
+        dialog.setMinimumWidth(400)
+        
+        layout = QVBoxLayout()
+        dialog.setLayout(layout)
+        
+        # Label informativ
+        info_label = QLabel("Selectați coloanele pe care doriți să le afișați:")
+        layout.addWidget(info_label)
+        
+        # Grid pentru checkbox-uri
+        grid_layout = QGridLayout()
+        layout.addLayout(grid_layout)
+        
+        # Checkbox "Selectează toate"
+        select_all_checkbox = QCheckBox("Selectează toate")
+        select_all_checkbox.setChecked(True)
+        grid_layout.addWidget(select_all_checkbox, 0, 0, 1, 2)
+        
+        # Creează checkbox pentru fiecare coloană
+        checkboxes = {}
+        visible_columns = self.table.get_visible_columns()
+        
+        row = 1
+        col = 0
+        for column_name in COLUMN_NAMES:
+            checkbox = QCheckBox(column_name)
+            checkbox.setChecked(column_name in visible_columns)
+            checkboxes[column_name] = checkbox
+            
+            grid_layout.addWidget(checkbox, row, col)
+            
+            col += 1
+            if col >= 2:  # 2 coloane
+                col = 0
+                row += 1
+        
+        # Handler pentru "Selectează toate"
+        def on_select_all_changed(state):
+            checked = state == Qt.CheckState.Checked.value
+            for cb in checkboxes.values():
+                cb.setChecked(checked)
+        
+        select_all_checkbox.stateChanged.connect(on_select_all_changed)
+        
+        # Butoane OK/Cancel
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | 
+            QDialogButtonBox.StandardButton.Cancel
+        )
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        layout.addWidget(button_box)
+        
+        # Afișează dialogul
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            # Colectează coloanele selectate
+            selected_columns = [
+                name for name, checkbox in checkboxes.items()
+                if checkbox.isChecked()
+            ]
+            
+            if not selected_columns:
+                QMessageBox.warning(
+                    self,
+                    "Atenție",
+                    "Trebuie să selectați cel puțin o coloană!"
+                )
+                return
+            
+            # Aplică selecția
+            self.table.set_visible_columns(selected_columns)
+            self._update_status_bar()
+    
+    def _on_about(self):
+        """Handler pentru dialogul Despre"""
+        about_text = """
+        <h2>Manager Certificate Securitate</h2>
+        <p><b>Versiune:</b> 1.0</p>
+        <p><b>Data:</b> Noiembrie 2025</p>
+        
+        <p><b>Descriere:</b><br>
+        Aplicație desktop pentru gestionarea certificatelor de securitate militare.</p>
+        
+        <p><b>Funcționalități:</b></p>
+        <ul>
+            <li>Adăugare, editare, ștergere certificate</li>
+            <li>Filtrare și sortare avansată</li>
+            <li>Import/Export Excel</li>
+            <li>Alertă automată pentru certificate care expiră</li>
+            <li>Colorare automată: galben (&lt; 3 luni), roșu (expirat)</li>
+        </ul>
+        
+        <p><b>Tehnologii:</b></p>
+        <ul>
+            <li>Python 3.11+</li>
+            <li>PyQt6 (interfață grafică)</li>
+            <li>pandas (gestionare date)</li>
+            <li>openpyxl (Excel)</li>
+        </ul>
+        
+        <p><b>Dezvoltat de:</b> Bogdan Ciubotaru</p>
+        <p><b>Pentru:</b> Ministerul Apărării Naționale, România</p>
+        
+        <p style="color: gray; font-size: 10px;">
+        <b>Repository:</b> <a href="https://github.com/CiubotaruBogdan/CertMan">
+        github.com/CiubotaruBogdan/CertMan</a>
+        </p>
+        """
+        
+        QMessageBox.about(self, "Despre Aplicație", about_text)

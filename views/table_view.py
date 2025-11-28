@@ -234,3 +234,26 @@ class CertificateTableView(QTableWidget):
             except:
                 # Dacă nu putem parsa data, ascundem rândul
                 self.setRowHidden(row, True)
+    
+    def get_visible_columns(self) -> list:
+        """
+        Returnează lista coloanelor vizibile
+        
+        Returns:
+            Listă cu numele coloanelor vizibile
+        """
+        visible = []
+        for col_idx, col_name in enumerate(COLUMN_NAMES):
+            if not self.isColumnHidden(col_idx):
+                visible.append(col_name)
+        return visible
+    
+    def set_visible_columns(self, column_names: list):
+        """
+        Setează coloanele vizibile
+        
+        Args:
+            column_names: Listă cu numele coloanelor de afișat
+        """
+        for col_idx, col_name in enumerate(COLUMN_NAMES):
+            self.setColumnHidden(col_idx, col_name not in column_names)
