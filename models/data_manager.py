@@ -39,11 +39,40 @@ class DataManager:
     def _validate_structure(self) -> bool:
         """
         Validează că fișierul are toate coloanele necesare
+        Suportă atât formatul nou (lowercase) cât și cel vechi (capitalized)
         
         Returns:
             True dacă structura este validă
         """
-        return all(col in self.df.columns for col in COLUMN_NAMES)
+        # Coloane vechi (pentru compatibilitate)
+        old_column_names = [
+            'Grad', 'Nume', 'Prenume', 'Data Nașterii',
+            'Serie Certificat', 'Număr Certificat', 'Nivel Certificat',
+            'Data Eliberare', 'Data Expirare', 'Observații'
+        ]
+        
+        # Verifică dacă are coloanele noi
+        has_new_columns = all(col in self.df.columns for col in COLUMN_NAMES)
+        
+        # Verifică dacă are coloanele vechi
+        has_old_columns = all(col in self.df.columns for col in old_column_names)
+        
+        # Dacă are coloanele vechi, le redenumește la cele noi
+        if has_old_columns and not has_new_columns:
+            rename_map = {
+                'Data Nașterii': 'Data nașterii',
+                'Serie Certificat': 'Serie certificat',
+                'Număr Certificat': 'Număr certificat',
+                'Nivel Certificat': 'Nivel certificat',
+                'Data Eliberare': 'Data eliberare',
+                'Data Expirare': 'Data expirare'
+            }
+            self.df.rename(columns=rename_map, inplace=True)
+            # Salvează cu noile nume
+            self._save()
+            return True
+        
+        return has_new_columns or has_old_columns
     
     def _save(self):
         """Salvează datele în fișierul Excel"""
@@ -71,9 +100,20 @@ class DataManager:
             Lista de obiecte Certificate
         """
         certificates = []
+        
+        # Dacă DataFrame-ul este gol, returnează listă goală
+        if self.df.empty:
+            return certificates
+        
         for _, row in self.df.iterrows():
             try:
-                cert = Certificate.from_dict(row.to_dict())
+                row_dict = row.to_dict()
+                
+                # Ignoră rânduri goale sau cu valori NaN
+                if pd.isna(row_dict.get('Nume')) or row_dict.get('Nume') == '':
+                    continue
+                
+                cert = Certificate.from_dict(row_dict)
                 certificates.append(cert)
             except Exception as e:
                 print(f"Eroare la parsarea certificatului: {e}")
