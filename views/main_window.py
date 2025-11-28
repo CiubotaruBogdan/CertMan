@@ -3,10 +3,10 @@ Fereastra principală a aplicației
 """
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                               QPushButton, QLineEdit, QLabel, QMessageBox,
-                              QFileDialog, QStatusBar, QToolBar)
+                              QFileDialog, QStatusBar, QToolBar, QComboBox)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
-from views.table_view import CertificateTableWidget
+from views.table_view import CertificateTableView
 from views.dialogs import CertificateDialog
 from models.data_manager import DataManager
 from models.certificate import Certificate
@@ -52,18 +52,33 @@ class MainWindow(QMainWindow):
         self.filter_edit.setPlaceholderText("Introduceți text pentru căutare...")
         self.filter_edit.textChanged.connect(self._on_filter_changed)
         
-        clear_filter_btn = QPushButton("Șterge Filtru")
+        # Dropdown filtru expirare
+        expiration_label = QLabel("Expiră în:")
+        self.expiration_combo = QComboBox()
+        self.expiration_combo.addItems([
+            "Toate",
+            "Expirate",
+            "1 lună",
+            "3 luni",
+            "6 luni",
+            "12 luni"
+        ])
+        self.expiration_combo.currentIndexChanged.connect(self._on_expiration_filter_changed)
+        
+        clear_filter_btn = QPushButton("Șterge filtre")
         clear_filter_btn.clicked.connect(self._clear_filter)
         
         filter_layout.addWidget(filter_label)
         filter_layout.addWidget(self.filter_edit)
+        filter_layout.addWidget(expiration_label)
+        filter_layout.addWidget(self.expiration_combo)
         filter_layout.addWidget(clear_filter_btn)
         
         main_layout.addLayout(filter_layout)
         
         # Tabel
-        self.table = CertificateTableWidget()
-        self.table.row_double_clicked.connect(self._on_edit_certificate)
+        self.table = CertificateTableView()
+        self.table.doubleClicked.connect(self._on_edit_certificate)
         main_layout.addWidget(self.table)
         
         # Status bar
@@ -146,14 +161,32 @@ class MainWindow(QMainWindow):
         )
     
     def _on_filter_changed(self, text: str):
-        """Handler pentru schimbarea filtrului"""
+        """Handler pentru schimbarea filtrului de căutare"""
         self.table.apply_filter(text)
         self._update_status_bar()
     
+    def _on_expiration_filter_changed(self, index: int):
+        """Handler pentru schimbarea filtrului de expirare"""
+        # Mapare index la luni
+        months_map = {
+            0: 0,    # Toate
+            1: -1,   # Expirate
+            2: 1,    # 1 lună
+            3: 3,    # 3 luni
+            4: 6,    # 6 luni
+            5: 12    # 12 luni
+        }
+        
+        months = months_map.get(index, 0)
+        self.table.apply_expiration_filter(months)
+        self._update_status_bar()
+    
     def _clear_filter(self):
-        """Șterge filtrul"""
+        """Șterge toate filtrele"""
         self.filter_edit.clear()
-        self.table.clear_filter()
+        self.expiration_combo.setCurrentIndex(0)
+        self.table.apply_filter("")
+        self.table.apply_expiration_filter(0)
         self._update_status_bar()
     
     def _on_add_certificate(self):
