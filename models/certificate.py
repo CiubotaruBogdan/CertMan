@@ -83,38 +83,68 @@ class Certificate:
     
     @classmethod
     def from_dict(cls, data: dict):
-        """Creează un certificat dintr-un dicționar"""
+        """Crează un certificat dintr-un dicționar"""
         from datetime import datetime
+        import pandas as pd
         
-        def parse_date(date_str):
+        # Verifică dacă data este un dicționar valid
+        if not isinstance(data, dict):
+            raise TypeError(f"Expected dict, got {type(data).__name__}")
+        
+        def parse_date(date_value):
             """Parse date în format DD.MM.YYYY sau YYYY-MM-DD"""
-            if isinstance(date_str, date):
-                return date_str
-            if isinstance(date_str, str):
-                # Încearcă format DD.MM.YYYY
+            # Verifică None sau NaN
+            if date_value is None or (isinstance(date_value, float) and pd.isna(date_value)):
+                raise ValueError("Data lipsă sau invalidă")
+            
+            if isinstance(date_value, date):
+                return date_value
+            
+            if isinstance(date_value, str):
+                date_value = date_value.strip()
+                if not date_value:
+                    raise ValueError("Data goală")
+                
+                # Încearca format DD.MM.YYYY
                 try:
-                    return datetime.strptime(date_str, '%d.%m.%Y').date()
+                    return datetime.strptime(date_value, '%d.%m.%Y').date()
                 except ValueError:
                     pass
-                # Încearcă format YYYY-MM-DD
+                # Încearca format YYYY-MM-DD
                 try:
-                    return datetime.strptime(date_str, '%Y-%m-%d').date()
+                    return datetime.strptime(date_value, '%Y-%m-%d').date()
                 except ValueError:
                     pass
-            raise ValueError(f"Format dată invalid: {date_str}")
+            
+            raise ValueError(f"Format dată invalid: {date_value} (tip: {type(date_value).__name__})")
         
-        return cls(
-            grad=data.get('Grad', ''),
-            nume=data.get('Nume', ''),
-            prenume=data.get('Prenume', ''),
-            data_nasterii=parse_date(data.get('Data nașterii') or data.get('Data Nașterii')),
-            serie_certificat=data.get('Serie certificat') or data.get('Serie Certificat', ''),
-            numar_certificat=data.get('Număr certificat') or data.get('Număr Certificat', ''),
-            nivel_certificat=data.get('Nivel certificat') or data.get('Nivel Certificat', ''),
-            data_eliberare=parse_date(data.get('Data eliberare') or data.get('Data Eliberare')),
-            data_expirare=parse_date(data.get('Data expirare') or data.get('Data Expirare')),
-            observatii=data.get('Observații', '')
-        )
+        def get_value(key1, key2='', default=''):
+            """Obține valoare cu fallback pentru chei multiple"""
+            value = data.get(key1)
+            if value is None or (isinstance(value, float) and pd.isna(value)):
+                if key2:
+                    value = data.get(key2)
+                    if value is None or (isinstance(value, float) and pd.isna(value)):
+                        return default
+                else:
+                    return default
+            return str(value) if value != default else default
+        
+        try:
+            return cls(
+                grad=get_value('Grad'),
+                nume=get_value('Nume'),
+                prenume=get_value('Prenume'),
+                data_nasterii=parse_date(data.get('Data nașterii') or data.get('Data Nașterii')),
+                serie_certificat=get_value('Serie certificat', 'Serie Certificat'),
+                numar_certificat=get_value('Număr certificat', 'Număr Certificat'),
+                nivel_certificat=get_value('Nivel certificat', 'Nivel Certificat'),
+                data_eliberare=parse_date(data.get('Data eliberare') or data.get('Data Eliberare')),
+                data_expirare=parse_date(data.get('Data expirare') or data.get('Data Expirare')),
+                observatii=get_value('Observații')
+            )
+        except Exception as e:
+            raise ValueError(f"Eroare la parsarea certificatului: {e}. Date: {data}")
     
     def zile_pana_la_expirare(self) -> int:
         """Calculează numărul de zile până la expirare"""

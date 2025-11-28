@@ -134,8 +134,8 @@ class CertificateDialog(QDialog):
             self.certificate.data_nasterii.day
         ))
         
-        self.serie_edit.setText(self.certificate.serie_certificat)
-        self.numar_edit.setText(self.certificate.numar_certificat)
+        self.serie_edit.setText(str(self.certificate.serie_certificat))
+        self.numar_edit.setText(str(self.certificate.numar_certificat))
         self.nivel_combo.setCurrentText(self.certificate.nivel_certificat)
         
         self.data_eliberare_edit.setDate(QDate(
