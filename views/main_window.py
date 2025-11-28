@@ -314,10 +314,17 @@ class MainWindow(QMainWindow):
     
     def _on_export(self):
         """Handler pentru export Excel"""
+        from datetime import datetime
+        
+        # Generează numele fișierului: AAAALLZZ_N_xx-CertificateSecuritate.xlsx
+        today = datetime.now()
+        num_records = len(self.data_manager.get_all_certificates())
+        default_filename = f"{today.strftime('%Y%m%d')}_N_{num_records:02d}-CertificateSecuritate.xlsx"
+        
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Selectați locația pentru export",
-            "certificate_export.xlsx",
+            default_filename,
             "Excel Files (*.xlsx)"
         )
         

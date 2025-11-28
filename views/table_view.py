@@ -24,8 +24,10 @@ class CertificateTableView(QTableWidget):
         
         # Configurare header
         header = self.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-        header.setStretchLastSection(True)
+        # Resize automat la conținut pentru toate coloanele
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # Ultima coloană (Observații) se întinde pentru a umple spațiul rămas
+        header.setSectionResizeMode(len(COLUMN_NAMES) - 1, QHeaderView.ResizeMode.Stretch)
         header.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         header.customContextMenuRequested.connect(self._show_column_menu)
         
@@ -77,7 +79,7 @@ class CertificateTableView(QTableWidget):
             self._add_certificate_row(cert)
         
         self.setSortingEnabled(True)
-        self.resizeColumnsToContents()
+        # Resize automat este deja setat în header
     
     def _add_certificate_row(self, certificate: Certificate):
         """
@@ -104,9 +106,25 @@ class CertificateTableView(QTableWidget):
             expirare_color = QColor(255, 255, 255)  # Alb
         
         for col_idx, col_name in enumerate(COLUMN_NAMES):
-            value = cert_dict.get(col_name, '')
+            # Coloana Nr. este numerotare automată
+            if col_name == 'Nr.':
+                value = str(row + 1)
+            else:
+                value = cert_dict.get(col_name, '')
+            
             item = QTableWidgetItem(str(value))
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            
+            # Pentru coloane cu date, setează sortData pentru sortare corectă
+            if col_name in ['Data nașterii', 'Data eliberare', 'Data expirare']:
+                # Convertim DD.MM.YYYY în YYYYMMDD pentru sortare corectă
+                try:
+                    parts = str(value).split('.')
+                    if len(parts) == 3:
+                        sort_key = f"{parts[2]}{parts[1]}{parts[0]}"  # YYYYMMDD
+                        item.setData(Qt.ItemDataRole.UserRole, sort_key)
+                except:
+                    pass
             
             # Aplică culoare DOAR pe celula Data expirare
             if col_name == 'Data expirare':
