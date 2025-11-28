@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script pentru crearea executabilului Certificate Manager
-Optimizat pentru dimensiune redusă
+Versiune STABILĂ - fără excluderi problematice
 """
 import os
 import sys
@@ -31,9 +31,9 @@ def clean_build_files():
 
 
 def build_executable():
-    """Creează executabilul folosind PyInstaller cu optimizări"""
+    """Creează executabilul folosind PyInstaller"""
     print("=" * 70)
-    print("Certificate Manager - Build Executabil Optimizat")
+    print("Certificate Manager - Build Executabil")
     print("=" * 70)
     print()
     
@@ -48,7 +48,7 @@ def build_executable():
     print(f"Executabil: {exe_name}")
     print()
     
-    # Opțiuni PyInstaller OPTIMIZATE
+    # Opțiuni PyInstaller - VERSIUNE SIGURĂ
     pyinstaller_args = [
         'pyinstaller',
         '--name=CertificateManager',
@@ -57,28 +57,12 @@ def build_executable():
         '--clean',  # Curăță cache
         '--noconfirm',  # Nu cere confirmare
         
-        # OPTIMIZĂRI DIMENSIUNE
-        '--strip',  # Elimină simboluri debug (reduce ~10-20%)
-        '--noupx',  # NU folosi UPX (poate cauza probleme)
+        # OPTIMIZĂRI SIGURE
+        '--noupx',  # NU folosi UPX (evită probleme)
         
-        # EXCLUDERE MODULE INUTILE (reduce ~30-40%)
+        # EXCLUDERI SIGURE - doar module care sigur nu sunt folosite
         '--exclude-module=tkinter',  # Nu folosim tkinter
         '--exclude-module=matplotlib',  # Nu folosim matplotlib
-        '--exclude-module=PIL',  # Nu folosim Pillow
-        '--exclude-module=IPython',  # Nu folosim IPython
-        '--exclude-module=notebook',  # Nu folosim Jupyter
-        '--exclude-module=scipy',  # Nu folosim scipy
-        '--exclude-module=sklearn',  # Nu folosim sklearn
-        '--exclude-module=pytest',  # Nu folosim pytest
-        
-        # EXCLUDERE BIBLIOTECI TEST
-        '--exclude-module=test',
-        '--exclude-module=tests',
-        '--exclude-module=unittest',
-        
-        # EXCLUDERE DOCUMENTAȚIE
-        '--exclude-module=pydoc',
-        '--exclude-module=doctest',
         
         'main.py'
     ]
@@ -117,23 +101,9 @@ def build_executable():
             size_mb = size_bytes / (1024 * 1024)
             print(f"📦 Executabil: {exe_path}")
             print(f"📊 Dimensiune: {size_mb:.1f} MB ({size_bytes:,} bytes)")
-            
-            if size_mb > 300:
-                print()
-                print("⚠️  ATENȚIE: Executabilul este mare (> 300 MB)")
-                print("   Cauze posibile:")
-                print("   - PyQt6 este foarte mare (~300-400 MB)")
-                print("   - pandas include numpy (~100-150 MB)")
-                print("   - Python runtime (~50-100 MB)")
-                print()
-                print("   Alternativă: folosiți Python + pip install (doar ~50 MB)")
-            elif size_mb > 200:
-                print()
-                print("ℹ️  Executabilul este acceptabil (200-300 MB)")
-                print("   PyQt6 și pandas ocupă majoritatea spațiului")
-            else:
-                print()
-                print("✅ Executabilul are dimensiune optimă (< 200 MB)")
+            print()
+            print("ℹ️  Nota: PyQt6 + pandas ocupă ~250-350 MB (normal pentru aplicații GUI)")
+            print("   Aceasta este dimensiunea standard pentru aplicații desktop moderne.")
         else:
             print(f"❌ Executabilul nu a fost găsit: {exe_path}")
         
