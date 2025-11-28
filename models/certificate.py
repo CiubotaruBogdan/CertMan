@@ -72,12 +72,12 @@ class Certificate:
             'Grad': self.grad,
             'Nume': self.nume,
             'Prenume': self.prenume,
-            'Data Nașterii': self.data_nasterii.strftime('%d.%m.%Y'),
-            'Serie Certificat': self.serie_certificat,
-            'Număr Certificat': self.numar_certificat,
-            'Nivel Certificat': self.nivel_certificat,
-            'Data Eliberare': self.data_eliberare.strftime('%d.%m.%Y'),
-            'Data Expirare': self.data_expirare.strftime('%d.%m.%Y'),
+            'Data nașterii': self.data_nasterii.strftime('%d.%m.%Y'),
+            'Serie certificat': self.serie_certificat,
+            'Număr certificat': self.numar_certificat,
+            'Nivel certificat': self.nivel_certificat,
+            'Data eliberare': self.data_eliberare.strftime('%d.%m.%Y'),
+            'Data expirare': self.data_expirare.strftime('%d.%m.%Y'),
             'Observații': self.observatii or ''
         }
     
@@ -107,12 +107,12 @@ class Certificate:
             grad=data.get('Grad', ''),
             nume=data.get('Nume', ''),
             prenume=data.get('Prenume', ''),
-            data_nasterii=parse_date(data.get('Data Nașterii')),
-            serie_certificat=data.get('Serie Certificat', ''),
-            numar_certificat=data.get('Număr Certificat', ''),
-            nivel_certificat=data.get('Nivel Certificat', ''),
-            data_eliberare=parse_date(data.get('Data Eliberare')),
-            data_expirare=parse_date(data.get('Data Expirare')),
+            data_nasterii=parse_date(data.get('Data nașterii') or data.get('Data Nașterii')),
+            serie_certificat=data.get('Serie certificat') or data.get('Serie Certificat', ''),
+            numar_certificat=data.get('Număr certificat') or data.get('Număr Certificat', ''),
+            nivel_certificat=data.get('Nivel certificat') or data.get('Nivel Certificat', ''),
+            data_eliberare=parse_date(data.get('Data eliberare') or data.get('Data Eliberare')),
+            data_expirare=parse_date(data.get('Data expirare') or data.get('Data Expirare')),
             observatii=data.get('Observații', '')
         )
     
@@ -141,11 +141,11 @@ COLUMN_NAMES = [
     'Grad',
     'Nume',
     'Prenume',
-    'Data Nașterii',
-    'Serie Certificat',
-    'Număr Certificat',
-    'Nivel Certificat',
-    'Data Eliberare',
-    'Data Expirare',
+    'Data nașterii',
+    'Serie certificat',
+    'Număr certificat',
+    'Nivel certificat',
+    'Data eliberare',
+    'Data expirare',
     'Observații'
 ]
