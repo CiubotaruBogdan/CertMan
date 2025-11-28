@@ -40,10 +40,14 @@ class DataManager:
         """
         Validează că fișierul are toate coloanele necesare
         Suportă atât formatul nou (lowercase) cât și cel vechi (capitalized)
+        Coloana 'Nr.' este ignorată (generată automat)
         
         Returns:
             True dacă structura este validă
         """
+        # Coloane necesare (fără Nr. care este generată automat)
+        required_columns = [col for col in COLUMN_NAMES if col != 'Nr.']
+        
         # Coloane vechi (pentru compatibilitate)
         old_column_names = [
             'Grad', 'Nume', 'Prenume', 'Data Nașterii',
@@ -51,8 +55,8 @@ class DataManager:
             'Data Eliberare', 'Data Expirare', 'Observații'
         ]
         
-        # Verifică dacă are coloanele noi
-        has_new_columns = all(col in self.df.columns for col in COLUMN_NAMES)
+        # Verifică dacă are coloanele noi (fără Nr.)
+        has_new_columns = all(col in self.df.columns for col in required_columns)
         
         # Verifică dacă are coloanele vechi
         has_old_columns = all(col in self.df.columns for col in old_column_names)
@@ -181,9 +185,10 @@ class DataManager:
         try:
             df_import = pd.read_excel(file_path)
             
-            # Validează structura
-            if not all(col in df_import.columns for col in COLUMN_NAMES):
-                missing = [col for col in COLUMN_NAMES if col not in df_import.columns]
+            # Validează structura (fără Nr. care este generată automat)
+            required_columns = [col for col in COLUMN_NAMES if col != 'Nr.']
+            if not all(col in df_import.columns for col in required_columns):
+                missing = [col for col in required_columns if col not in df_import.columns]
                 return False, f"Lipsesc coloanele: {', '.join(missing)}"
             
             # Validează fiecare rând
@@ -197,8 +202,11 @@ class DataManager:
             if errors:
                 return False, "Erori de validare:\n" + "\n".join(errors[:5])
             
-            # Dacă totul e OK, adaugă datele
-            self.df = pd.concat([self.df, df_import[COLUMN_NAMES]], ignore_index=True)
+            # Dacă totul e OK, adaugă datele (fără Nr. care este generată automat)
+            required_columns = [col for col in COLUMN_NAMES if col != 'Nr.']
+            # Selectează doar coloanele care există în df_import
+            cols_to_import = [col for col in required_columns if col in df_import.columns]
+            self.df = pd.concat([self.df, df_import[cols_to_import]], ignore_index=True)
             self._save()
             
             return True, f"Importate cu succes {len(df_import)} înregistrări"
