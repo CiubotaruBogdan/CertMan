@@ -4,7 +4,8 @@ Fereastra principală a aplicației
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                               QPushButton, QLineEdit, QLabel, QMessageBox,
                               QFileDialog, QStatusBar, QToolBar, QComboBox,
-                              QDialog, QCheckBox, QDialogButtonBox, QGridLayout)
+                              QDialog, QCheckBox, QDialogButtonBox, QGridLayout,
+                              QSizePolicy)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from views.table_view import CertificateTableView
@@ -151,7 +152,7 @@ class MainWindow(QMainWindow):
         
         # Spacer pentru a împinge butonul Despre la dreapta
         spacer = QWidget()
-        spacer.setSizePolicy(QWidget.SizePolicy.Policy.Expanding, QWidget.SizePolicy.Policy.Preferred)
+        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         toolbar.addWidget(spacer)
         
         # Buton Despre (dreapta jos)
