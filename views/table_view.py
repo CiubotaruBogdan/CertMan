@@ -24,10 +24,10 @@ class CertificateTableView(QTableWidget):
         
         # Configurare header
         header = self.horizontalHeader()
-        # Resize automat la conținut pentru toate coloanele
-        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # Resize manual Interactive - utilizatorul poate trage marginile
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         # Ultima coloană (Observații) se întinde pentru a umple spațiul rămas
-        header.setSectionResizeMode(len(COLUMN_NAMES) - 1, QHeaderView.ResizeMode.Stretch)
+        header.setStretchLastSection(True)
         header.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         header.customContextMenuRequested.connect(self._show_column_menu)
         
@@ -79,7 +79,8 @@ class CertificateTableView(QTableWidget):
             self._add_certificate_row(cert)
         
         self.setSortingEnabled(True)
-        # Resize automat este deja setat în header
+        # Resize inițial la conținut (apoi manual)
+        self.resizeColumnsToContents()
     
     def _add_certificate_row(self, certificate: Certificate):
         """
