@@ -70,8 +70,6 @@ def build_executable():
         '--exclude-module=scipy',  # Nu folosim scipy
         '--exclude-module=sklearn',  # Nu folosim sklearn
         '--exclude-module=pytest',  # Nu folosim pytest
-        '--exclude-module=setuptools',  # Nu e necesar în executabil
-        '--exclude-module=distutils',  # Nu e necesar în executabil
         
         # EXCLUDERE BIBLIOTECI TEST
         '--exclude-module=test',
