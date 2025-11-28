@@ -14,6 +14,21 @@ from views.alert_dialog import AlertDialog
 from utils.config_manager import ConfigManager
 
 
+def get_app_directory() -> Path:
+    """
+    Returnează directorul unde rulează aplicația (executabil sau script)
+    
+    Returns:
+        Path către directorul aplicației
+    """
+    if getattr(sys, 'frozen', False):
+        # Rulare ca executabil (PyInstaller)
+        return Path(sys.executable).parent
+    else:
+        # Rulare ca script Python
+        return Path(__file__).parent
+
+
 def select_data_file(parent=None) -> str:
     """
     Permite utilizatorului să selecteze sau creeze un fișier de date
@@ -24,6 +39,10 @@ def select_data_file(parent=None) -> str:
     Returns:
         Calea către fișierul selectat
     """
+    # Locație default: directorul aplicației
+    app_dir = get_app_directory()
+    default_file = app_dir / "certificate_securitate.xlsx"
+    
     msg = QMessageBox(parent)
     msg.setWindowTitle("Selectare Fișier Date")
     msg.setText("Selectați fișierul Excel pentru stocarea datelor.")
@@ -41,20 +60,20 @@ def select_data_file(parent=None) -> str:
     if clicked == cancel_btn:
         return None
     elif clicked == new_btn:
-        # Creează fișier nou
+        # Creează fișier nou - default în directorul aplicației
         file_path, _ = QFileDialog.getSaveFileName(
             parent,
             "Creați fișierul de date",
-            str(Path.home() / "certificate_securitate.xlsx"),
+            str(default_file),
             "Excel Files (*.xlsx)"
         )
         return file_path
     else:
-        # Selectează fișier existent
+        # Selectează fișier existent - default în directorul aplicației
         file_path, _ = QFileDialog.getOpenFileName(
             parent,
             "Selectați fișierul de date",
-            str(Path.home()),
+            str(app_dir),
             "Excel Files (*.xlsx)"
         )
         return file_path
@@ -89,18 +108,42 @@ def main():
     app.setPalette(light_palette)
     app.setStyle("Fusion")
     
-    # Încarcă configurația
+    # Încărcă configurația
     config_manager = ConfigManager()
     
     # Verifică dacă există un fișier de date configurat
     data_file_path = config_manager.get_data_file_path()
     
-    if not data_file_path or not Path(data_file_path).parent.exists():
-        # Prima deschidere sau cale invalidă - solicită utilizatorului să selecteze
+    # Verifică dacă există fișier default în directorul aplicației
+    app_dir = get_app_directory()
+    default_file = app_dir / "certificate_securitate.xlsx"
+    
+    if not data_file_path:
+        # Prima rulare - verifică dacă există fișier default
+        if default_file.exists():
+            # Folosește fișierul default existent
+            data_file_path = str(default_file)
+            config_manager.set_data_file_path(data_file_path)
+        else:
+            # Nu există fișier - solicită utilizatorului
+            data_file_path = select_data_file()
+            
+            if not data_file_path:
+                # Utilizatorul a anulat
+                QMessageBox.critical(
+                    None,
+                    "Eroare",
+                    "Este necesar un fișier de date pentru a continua."
+                )
+                sys.exit(1)
+            
+            # Salvează calea în configurație
+            config_manager.set_data_file_path(data_file_path)
+    elif not Path(data_file_path).exists():
+        # Fișierul configurat nu mai există - solicită utilizatorului
         data_file_path = select_data_file()
         
         if not data_file_path:
-            # Utilizatorul a anulat
             QMessageBox.critical(
                 None,
                 "Eroare",
@@ -108,7 +151,6 @@ def main():
             )
             sys.exit(1)
         
-        # Salvează calea în configurație
         config_manager.set_data_file_path(data_file_path)
     
     # Bucla pentru încărcare date cu gestionare erori
