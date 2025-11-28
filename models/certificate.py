@@ -6,26 +6,53 @@ from datetime import date
 from typing import Optional
 
 
-# Nomenclator grade militare România
+# Nomenclator grade militare România (ABREVIERI OFICIALE)
 GRADE_MILITARE = [
-    "Soldat",
-    "Caporal",
-    "Sergent",
-    "Sergent Major",
-    "Plutonier Adjutant",
-    "Plutonier",
-    "Plutonier Adjutant Principal",
-    "Plutonier Major",
-    "Sublocotenent",
-    "Locotenent",
-    "Căpitan",
-    "Major",
-    "Locotenent Colonel",
-    "Colonel",
-    "General de Brigadă",
-    "General de Divizie",
-    "General",
-    "General de Armată"
+    # Subofițeri (OR-1 la OR-9)
+    "Sold.",  # Soldat
+    "Frt.",  # Fruntaș
+    "Cap. III",  # Caporal clasa a III-a
+    "Cap. II",  # Caporal clasa a II-a
+    "Cap. I",  # Caporal clasa I
+    "Sg.",  # Sergent
+    "Sg. maj.",  # Sergent-major
+    "Plt.",  # Plutonier
+    "Plt. maj.",  # Plutonier-major
+    "Plt. adj.",  # Plutonier adjutant
+    "Plt. adj. pr.",  # Plutonier adjutant principal
+    
+    # Maiștri militari (WO-0 la WO-5)
+    "M. m. V",  # Maistru militar clasa V
+    "M. m. IV",  # Maistru militar clasa IV
+    "M. m. III",  # Maistru militar clasa III
+    "M. m. II",  # Maistru militar clasa II
+    "M. m. I",  # Maistru militar clasa I
+    "M. m. p.",  # Maistru militar principal
+    
+    # Ofițeri (OF-1 la OF-10)
+    "Slt.",  # Sublocotenent
+    "Asp.",  # Aspirant (Forțe Navale)
+    "Lt.",  # Locotenent
+    "Cpt.",  # Căpitan
+    "Mr.",  # Maior
+    "Lt. col.",  # Locotenent-colonel
+    "Col.",  # Colonel
+    "Gl. bg.",  # General de brigadă
+    "Gl. mr.",  # General-maior
+    "Gl. lt.",  # General-locotenent
+    "Gl.",  # General
+    
+    # Ofițeri Forțe Navale (specifice)
+    "Lt. cdor.",  # Locotenent-comandor
+    "Cpt. cdor.",  # Căpitan-comandor
+    "Cdor.",  # Comandor
+    "Cam. fl.",  # Contraamiral de flotilă
+    "Cam.",  # Contraamiral
+    "Vam.",  # Viceamiral
+    "Am.",  # Amiral
+    
+    # Ofițeri Forțe Aeriene (specifice)
+    "Gl. fl. aer.",  # General de flotilă aeriană
 ]
 
 # Niveluri certificate
@@ -168,6 +195,7 @@ class Certificate:
 
 # Coloanele tabelului în ordinea dorită
 COLUMN_NAMES = [
+    'Nr.',
     'Grad',
     'Nume',
     'Prenume',
