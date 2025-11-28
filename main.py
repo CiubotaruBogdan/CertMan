@@ -118,6 +118,14 @@ def main():
         # Creează și afișează fereastra principală
         window = MainWindow(data_manager)
         
+        # Setează icon aplicație
+        import os
+        from PyQt6.QtGui import QIcon
+        icon_path = os.path.join(os.path.dirname(__file__), 'assets', 'icon.png')
+        if os.path.exists(icon_path):
+            app.setWindowIcon(QIcon(icon_path))
+            window.setWindowIcon(QIcon(icon_path))
+        
         # Restaurează geometria ferestrei dacă există
         geometry = config_manager.get_window_geometry()
         if geometry and isinstance(geometry, dict) and all(k in geometry for k in ['x', 'y', 'width', 'height']):

@@ -49,6 +49,16 @@ def build_executable():
         'main.py'
     ]
     
+    # Adaugă icon dacă există
+    if is_windows and os.path.exists('assets/icon.ico'):
+        pyinstaller_args.insert(-1, '--icon=assets/icon.ico')
+        pyinstaller_args.insert(-1, '--add-data=assets;assets')
+        print("✅ Icon Windows adăugat: assets/icon.ico")
+    elif not is_windows and os.path.exists('assets/icon.png'):
+        pyinstaller_args.insert(-1, '--icon=assets/icon.png')
+        pyinstaller_args.insert(-1, '--add-data=assets:assets')
+        print("✅ Icon Linux/macOS adăugat: assets/icon.png")
+    
     print(f"Platform: {sys.platform}")
     print(f"Executabil: {exe_name}")
     print(f"Comandă: {' '.join(pyinstaller_args)}")
