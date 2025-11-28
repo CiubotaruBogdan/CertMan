@@ -155,14 +155,20 @@ def main():
             # Restaurează geometria ferestrei dacă există
             debug_print("Restaurare geometrie fereastră...")
             geometry = config_manager.get_window_geometry()
-            if geometry:
-                window.setGeometry(
-                    geometry['x'],
-                    geometry['y'],
-                    geometry['width'],
-                    geometry['height']
-                )
-                debug_print("✓ Geometrie restaurată")
+            debug_print(f"Geometrie încărcată: {geometry} (tip: {type(geometry).__name__})")
+            if geometry and isinstance(geometry, dict) and all(k in geometry for k in ['x', 'y', 'width', 'height']):
+                try:
+                    window.setGeometry(
+                        int(geometry['x']),
+                        int(geometry['y']),
+                        int(geometry['width']),
+                        int(geometry['height'])
+                    )
+                    debug_print("✓ Geometrie restaurată")
+                except (ValueError, TypeError) as e:
+                    debug_print(f"⚠ Eroare la restaurarea geometriei: {e}. Se ignoră.")
+            else:
+                debug_print("⚠ Geometrie invalidă sau lipsă - se folosesc dimensiuni implicite")
             
             debug_print("Afișare fereastră...")
             window.show()

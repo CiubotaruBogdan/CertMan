@@ -120,13 +120,16 @@ def main():
         
         # Restaurează geometria ferestrei dacă există
         geometry = config_manager.get_window_geometry()
-        if geometry:
-            window.setGeometry(
-                geometry['x'],
-                geometry['y'],
-                geometry['width'],
-                geometry['height']
-            )
+        if geometry and isinstance(geometry, dict) and all(k in geometry for k in ['x', 'y', 'width', 'height']):
+            try:
+                window.setGeometry(
+                    int(geometry['x']),
+                    int(geometry['y']),
+                    int(geometry['width']),
+                    int(geometry['height'])
+                )
+            except (ValueError, TypeError) as e:
+                print(f"Eroare la restaurarea geometriei: {e}. Se ignoră.")
         
         window.show()
         
