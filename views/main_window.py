@@ -12,6 +12,7 @@ from views.table_view import CertificateTableView
 from views.dialogs import CertificateDialog
 from models.data_manager import DataManager
 from models.certificate import Certificate
+from utils.config_manager import ConfigManager
 
 
 class MainWindow(QMainWindow):
@@ -348,6 +349,11 @@ class MainWindow(QMainWindow):
         if file_path:
             try:
                 self.data_manager.change_data_source(file_path)
+                
+                # Salvează noua cale în configurație
+                config_manager = ConfigManager()
+                config_manager.set_data_file_path(file_path)
+                
                 self._load_data()
                 QMessageBox.information(
                     self,

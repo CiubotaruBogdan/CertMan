@@ -111,10 +111,61 @@ def main():
         # Salvează calea în configurație
         config_manager.set_data_file_path(data_file_path)
     
+    # Bucla pentru încărcare date cu gestionare erori
+    data_manager = None
+    max_attempts = 3
+    attempt = 0
+    
+    while attempt < max_attempts and data_manager is None:
+        try:
+            # Inițializează managerul de date
+            data_manager = DataManager(data_file_path)
+            break  # Succes, ieșim din buclă
+            
+        except Exception as e:
+            attempt += 1
+            error_msg = f"Eroare la încărcarea fișierului:\n{data_file_path}\n\nDetalii: {str(e)}"
+            
+            if attempt < max_attempts:
+                # Oferă opțiunea de a selecta alt fișier
+                reply = QMessageBox.critical(
+                    None,
+                    "Eroare Încărcare Date",
+                    f"{error_msg}\n\nDoriți să selectați alt fișier?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                
+                if reply == QMessageBox.StandardButton.Yes:
+                    # Solicită utilizatorului să selecteze alt fișier
+                    new_file_path = select_data_file()
+                    
+                    if new_file_path:
+                        data_file_path = new_file_path
+                        config_manager.set_data_file_path(data_file_path)
+                    else:
+                        # Utilizatorul a anulat
+                        QMessageBox.critical(
+                            None,
+                            "Eroare",
+                            "Este necesar un fișier de date pentru a continua."
+                        )
+                        sys.exit(1)
+                else:
+                    # Utilizatorul a ales să nu selecteze alt fișier
+                    sys.exit(1)
+            else:
+                # S-au epuizat încercările
+                QMessageBox.critical(
+                    None,
+                    "Eroare Critică",
+                    f"{error_msg}\n\nAplicația nu poate continua."
+                )
+                sys.exit(1)
+    
+    if data_manager is None:
+        sys.exit(1)
+    
     try:
-        # Inițializează managerul de date
-        data_manager = DataManager(data_file_path)
-        
         # Creează și afișează fereastra principală
         window = MainWindow(data_manager)
         
@@ -167,7 +218,7 @@ def main():
         QMessageBox.critical(
             None,
             "Eroare Critică",
-            f"Eroare la inițializarea aplicației:\n{str(e)}"
+            f"Eroare neașteptată la inițializarea aplicației:\n{str(e)}"
         )
         sys.exit(1)
 
