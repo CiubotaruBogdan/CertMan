@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
         
         # Tabel
         self.table = CertificateTableView()
-        self.table.doubleClicked.connect(self._on_edit_certificate)
+        self.table.doubleClicked.connect(self._on_table_double_clicked)
         main_layout.addWidget(self.table)
         
         # Status bar
@@ -211,6 +211,16 @@ class MainWindow(QMainWindow):
             return
         
         self._on_edit_certificate(selected_row)
+    
+    def _on_table_double_clicked(self, index):
+        """
+        Handler pentru dublu-click pe tabel
+        
+        Args:
+            index: QModelIndex al celulei clickate
+        """
+        if index.isValid():
+            self._on_edit_certificate(index.row())
     
     def _on_edit_certificate(self, row: int):
         """
